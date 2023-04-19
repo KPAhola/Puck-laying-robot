@@ -20,6 +20,9 @@ long readUltrasonicDistance(int triggerPin, int echoPin)
 }
 
 void display_distance(double distance) {
+  if (distance > 9999) {
+  	distance = 9999;
+  }
   int digit1 = distance / 1000;
   distance -= 1000 * digit1;
   int digit2 = distance / 100;
