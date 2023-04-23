@@ -1,7 +1,13 @@
 // C++ code
 //
+#define CLK 13
+#define DIO 12
+#define STB 11
+#define MOTOR 3
 #define STOP_DISTANCE 10
 #define SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER 0.01723
+
+static const uint8_t digits[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
 
 static double distance_travelled = 0;
 
@@ -19,38 +25,58 @@ long readUltrasonicDistance(int triggerPin, int echoPin)
   return pulseIn(echoPin, HIGH);
 }
 
-void display_distance(double distance) {
-  if (distance > 9999) {
-  	distance = 9999;
+void sendCommand(uint8_t command) {
+  digitalWrite(STB, LOW);
+  shiftOut(DIO, CLK, LSBFIRST, command);
+  digitalWrite(STB, HIGH);
+}
+
+void display_value(double value) {
+  if (value > 9999) {
+    value = 9999;
   }
-  int digit1 = distance / 1000;
-  distance -= 1000 * digit1;
-  int digit2 = distance / 100;
-  distance -= 100 * digit2;
-  int digit3 = distance / 10;
-  distance -= 10 * digit3;
-  int digit4 = distance;
-  Serial.print(digit1);
-  Serial.print(digit2);
-  Serial.print(digit3);
-  Serial.println(digit4);
+  int digit1 = value / 1000;
+  value -= 1000 * digit1;
+  int digit2 = value / 100;
+  value -= 100 * digit2;
+  int digit3 = value / 10;
+  value -= 10 * digit3;
+  int digit4 = value;
+  if (value - digit4 >= 0.5) {
+    digit4++;
+  }
+  sendCommand(0x40);
+  digitalWrite(STB, LOW);
+  shiftOut(DIO, CLK, LSBFIRST, 0xc0);
+  shiftOut(DIO, CLK, LSBFIRST, digits[digit1]);
+  shiftOut(DIO, CLK, LSBFIRST, 0x00);
+  shiftOut(DIO, CLK, LSBFIRST, digits[digit2]);
+  shiftOut(DIO, CLK, LSBFIRST, 0x00);
+  shiftOut(DIO, CLK, LSBFIRST, digits[digit3]);
+  shiftOut(DIO, CLK, LSBFIRST, 0x00);
+  shiftOut(DIO, CLK, LSBFIRST, digits[digit4]);
+  shiftOut(DIO, CLK, LSBFIRST, 0x00);
+  digitalWrite(STB, HIGH);
 }
 
 void setup()
 {
   pinMode(A5, INPUT);
-  pinMode(3, OUTPUT);
-  Serial.begin(9600);
+  pinMode(MOTOR, OUTPUT);
+  pinMode(CLK, OUTPUT);
+  pinMode(DIO, OUTPUT);
+  pinMode(STB, OUTPUT);
+  sendCommand(0x8f);
 }
 
 void loop()
 {
   double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(10, 9);
   if (obstacle_distance <= STOP_DISTANCE) {
-    digitalWrite(3, HIGH);
+    digitalWrite(MOTOR, HIGH);
    } else {
-  	analogWrite(3, map(analogRead(A5), 0, 1023, 0, 255));
+  	analogWrite(MOTOR, map(analogRead(A5), 0, 1023, 0, 255));
    }
-  display_distance(distance_travelled);
+  display_value(distance_travelled);
   delay(500); // Wait for 500 millisecond(s)
 }
