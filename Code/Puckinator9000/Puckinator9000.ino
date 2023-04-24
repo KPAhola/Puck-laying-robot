@@ -6,6 +6,7 @@
 #define CLK 9
 #define DIO 8
 #define STB 7
+#define BUTTON 5
 #define ROTATION 4
 #define MOTOR 3
 
@@ -16,6 +17,7 @@
 static const uint8_t digits[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
 
 static double distance_travelled = 0;
+static boolean is_running = false;
 
 long readUltrasonicDistance(int triggerPin, int echoPin)
 {
@@ -79,15 +81,24 @@ void setup()
 
 void loop()
 {
-  double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
-  if (obstacle_distance <= STOP_DISTANCE) {
-    digitalWrite(MOTOR, HIGH);
-   } else {
-  	analogWrite(MOTOR, LOW);
-   }
-  if (digitalRead(ROTATION)) {
-    distance_travelled += DISTANCE_PER_IR_PULSE;
+  if (is_running) {
+    if (digitalRead(BUTTON)) {
+      is_running = false;
+    }
+    double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
+    if (obstacle_distance <= STOP_DISTANCE) {
+      digitalWrite(MOTOR, HIGH);
+    } else {
+  	  analogWrite(MOTOR, LOW);
+    }
+    if (digitalRead(ROTATION)) {
+      distance_travelled += DISTANCE_PER_IR_PULSE;
+    }
+    display_value(distance_travelled);
+  } else {
+    if (digitalRead(BUTTON)) {
+      is_running = true;
+    }
   }
-  display_value(distance_travelled);
   delay(10); // Wait for 10 millisecond(s)
 }
