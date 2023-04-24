@@ -1,5 +1,9 @@
 // C++ code
 //
+/*
+ * Todo: When the motor turns on, the display turns off
+ * 
+*/
 #define ULTRASONIC_TRIGGER 12
 #define ULTRASONIC_ECHO 13
 #define ULTRASONIC_POWER 11
@@ -81,24 +85,24 @@ void setup()
 
 void loop()
 {
-  if (is_running) {
-    if (digitalRead(BUTTON)) {
-      is_running = false;
-    }
-    double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
-    if (obstacle_distance <= STOP_DISTANCE) {
-      digitalWrite(MOTOR, HIGH);
-    } else {
-  	  analogWrite(MOTOR, LOW);
-    }
-    if (digitalRead(ROTATION)) {
-      distance_travelled += DISTANCE_PER_IR_PULSE;
-    }
-    display_value(distance_travelled);
-  } else {
-    if (digitalRead(BUTTON)) {
+  if (digitalRead(BUTTON)) {
       is_running = true;
+      delay(1000);
+      while(is_running) {
+         double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
+          if (obstacle_distance <= STOP_DISTANCE) {
+            digitalWrite(MOTOR, HIGH);
+          } else {
+            analogWrite(MOTOR, LOW);
+          }
+        if (digitalRead(ROTATION)) {
+        distance_travelled += DISTANCE_PER_IR_PULSE;
+        }
+        display_value(distance_travelled);
+        if (digitalRead(BUTTON)) {
+          is_running = false;
+        }
+      }
     }
-  }
   delay(10); // Wait for 10 millisecond(s)
 }
