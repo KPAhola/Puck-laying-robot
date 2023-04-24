@@ -1,10 +1,14 @@
 // C++ code
 //
-#define CLK 13
-#define DIO 12
-#define STB 11
-#define ROTATION A0
+#define ULTRASONIC_TRIGGER 12
+#define ULTRASONIC_ECHO 13
+#define ULTRASONIC_POWER 11
+#define CLK 9
+#define DIO 8
+#define STB 7
+#define ROTATION 4
 #define MOTOR 3
+
 #define STOP_DISTANCE 10
 #define DISTANCE_PER_IR_PULSE 1
 #define SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER 0.01723
@@ -68,18 +72,20 @@ void setup()
   pinMode(DIO, OUTPUT);
   pinMode(STB, OUTPUT);
   pinMode(ROTATION, INPUT);
+  pinMode(ULTRASONIC_POWER, OUTPUT);
+  digitalWrite(ULTRASONIC_POWER, HIGH);
   sendCommand(0x8f);
 }
 
 void loop()
 {
-  double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(10, 9);
+  double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
   if (obstacle_distance <= STOP_DISTANCE) {
     digitalWrite(MOTOR, HIGH);
    } else {
   	analogWrite(MOTOR, LOW);
    }
-  if (analogRead(ROTATION) > 100) {
+  if (digitalRead(ROTATION)) {
     distance_travelled += DISTANCE_PER_IR_PULSE;
   }
   display_value(distance_travelled);
