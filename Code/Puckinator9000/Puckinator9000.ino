@@ -61,7 +61,6 @@ void display_value(double value) {
 
 void setup()
 {
-  pinMode(A5, INPUT);
   pinMode(MOTOR, OUTPUT);
   pinMode(CLK, OUTPUT);
   pinMode(DIO, OUTPUT);
@@ -75,7 +74,7 @@ void loop()
   if (obstacle_distance <= STOP_DISTANCE) {
     digitalWrite(MOTOR, HIGH);
    } else {
-  	analogWrite(MOTOR, map(analogRead(A5), 0, 1023, 0, 255));
+  	analogWrite(MOTOR, LOW);
    }
   display_value(distance_travelled);
   delay(500); // Wait for 500 millisecond(s)
