@@ -3,8 +3,10 @@
 #define CLK 13
 #define DIO 12
 #define STB 11
+#define ROTATION A0
 #define MOTOR 3
 #define STOP_DISTANCE 10
+#define DISTANCE_PER_IR_PULSE 1
 #define SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER 0.01723
 
 static const uint8_t digits[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
@@ -65,6 +67,7 @@ void setup()
   pinMode(CLK, OUTPUT);
   pinMode(DIO, OUTPUT);
   pinMode(STB, OUTPUT);
+  pinMode(ROTATION, INPUT);
   sendCommand(0x8f);
 }
 
@@ -76,6 +79,9 @@ void loop()
    } else {
   	analogWrite(MOTOR, LOW);
    }
+  if (analogRead(ROTATION) > 100) {
+    distance_travelled += DISTANCE_PER_IR_PULSE;
+  }
   display_value(distance_travelled);
-  delay(500); // Wait for 500 millisecond(s)
+  delay(10); // Wait for 10 millisecond(s)
 }
