@@ -1,8 +1,6 @@
 // C++ code
 //
-/*
- * Todo:
-*/
+
 #define ULTRASONIC_TRIGGER 12
 #define ULTRASONIC_ECHO 13
 #define ULTRASONIC_POWER 11
@@ -14,13 +12,15 @@
 #define MOTOR 3
 
 #define STOP_DISTANCE 10
-#define DISTANCE_PER_IR_PULSE 1
+#define DISTANCE_PER_HOLE 0.5
+#define DISTANCE_BETWEEN_HOLES 0.5
 #define SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER 0.01723
 
 static const uint8_t digits[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
 
 static double distance_travelled = 0;
 static boolean is_running = false;
+static boolean hole = false;
 
 long readUltrasonicDistance(int triggerPin, int echoPin)
 {
@@ -105,17 +105,25 @@ void loop()
       digitalWrite(MOTOR, HIGH);
       delay(50);
     } else {
-      analogWrite(MOTOR, LOW);
+      digitalWrite(MOTOR, LOW);
       delay(50);
       sendCommand(0x8f); //Resets the display
     }
-    if (digitalRead(ROTATION)) {
-    distance_travelled += DISTANCE_PER_IR_PULSE;
+    
+    if (hole) {
+      if (!digitalRead(ROTATION)) {
+        hole = false;
+        distance_travelled += DISTANCE_PER_HOLE;
+      }
+    } else if (digitalRead(ROTATION)) {
+      hole = true;
+      distance_travelled += DISTANCE_BETWEEN_HOLES;
     }
     display_value(distance_travelled);
+    
     if (digitalRead(BUTTON)) {
       is_running = false;
-      analogWrite(MOTOR, LOW);
+      digitalWrite(MOTOR, LOW);
       while(digitalRead(BUTTON)){
         delay(10);
       }
