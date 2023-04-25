@@ -11,7 +11,7 @@
 #define ROTATION 4
 #define MOTOR 3
 
-#define STOP_DISTANCE 10
+#define STOP_DISTANCE 5
 #define DISTANCE_PER_HOLE 0.5
 #define DISTANCE_BETWEEN_HOLES 0.5
 #define SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER 0.01723
@@ -105,8 +105,8 @@ void loop()
       digitalWrite(MOTOR, HIGH);
       delay(50);
     } else {
+      is_running = false;
       digitalWrite(MOTOR, LOW);
-      delay(50);
       sendCommand(0x8f); //Resets the display
     }
     
