@@ -86,23 +86,31 @@ void setup()
 void loop()
 {
   if (digitalRead(BUTTON)) {
-      is_running = true;
-      delay(1000);
-      while(is_running) {
-         double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
-          if (obstacle_distance <= STOP_DISTANCE) {
-            digitalWrite(MOTOR, HIGH);
-          } else {
-            analogWrite(MOTOR, LOW);
-          }
-        if (digitalRead(ROTATION)) {
-        distance_travelled += DISTANCE_PER_IR_PULSE;
-        }
-        display_value(distance_travelled);
-        if (digitalRead(BUTTON)) {
-          is_running = false;
-        }
+    is_running = true;
+    while(digitalRead(BUTTON)){
+      delay(10);
+    }
+  }
+  while(is_running) {
+    double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
+    if (obstacle_distance >= STOP_DISTANCE) {
+      digitalWrite(MOTOR, HIGH);
+      delay(50);
+    } else {
+      analogWrite(MOTOR, LOW);
+      delay(50);
+    }
+    if (digitalRead(ROTATION)) {
+    distance_travelled += DISTANCE_PER_IR_PULSE;
+    }
+    display_value(distance_travelled);
+    if (digitalRead(BUTTON)) {
+      is_running = false;
+      analogWrite(MOTOR, LOW);
+      while(digitalRead(BUTTON)){
+        delay(10);
       }
     }
+  }
   delay(10); // Wait for 10 millisecond(s)
 }
