@@ -1,8 +1,7 @@
 // C++ code
 //
 /*
- * Todo: When the motor turns on, the display turns off
- * 
+ * Todo:
 */
 #define ULTRASONIC_TRIGGER 12
 #define ULTRASONIC_ECHO 13
@@ -69,6 +68,11 @@ void display_value(double value) {
   shiftOut(DIO, CLK, LSBFIRST, digits[digit4]);
   shiftOut(DIO, CLK, LSBFIRST, 0x00);
   digitalWrite(STB, HIGH);
+
+  Serial.print(digit1);
+  Serial.print(digit2);
+  Serial.print(digit3);
+  Serial.println(digit4);
 }
 
 void setup()
@@ -81,6 +85,10 @@ void setup()
   pinMode(ULTRASONIC_POWER, OUTPUT);
   digitalWrite(ULTRASONIC_POWER, HIGH);
   sendCommand(0x8f);
+  digitalWrite(STB, HIGH);
+
+  Serial.begin(9600);
+
 }
 
 void loop()
@@ -99,6 +107,7 @@ void loop()
     } else {
       analogWrite(MOTOR, LOW);
       delay(50);
+      sendCommand(0x8f); //Resets the display
     }
     if (digitalRead(ROTATION)) {
     distance_travelled += DISTANCE_PER_IR_PULSE;
@@ -110,7 +119,9 @@ void loop()
       while(digitalRead(BUTTON)){
         delay(10);
       }
+      sendCommand(0x8f); //Resets the display
     }
   }
   delay(10); // Wait for 10 millisecond(s)
+
 }
