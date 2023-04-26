@@ -68,11 +68,6 @@ void display_value(double value) {
   shiftOut(DIO, CLK, LSBFIRST, digits[digit4]);
   shiftOut(DIO, CLK, LSBFIRST, 0x00);
   digitalWrite(STB, HIGH);
-
-  Serial.print(digit1);
-  Serial.print(digit2);
-  Serial.print(digit3);
-  Serial.println(digit4);
 }
 
 void setup()
@@ -87,24 +82,21 @@ void setup()
   sendCommand(0x8f);
   digitalWrite(STB, HIGH);
 
-  Serial.begin(9600);
-
 }
 
 void loop()
 {
   if (digitalRead(BUTTON)) {
     is_running = true;
+    digitalWrite(MOTOR, HIGH);
+    delay(50);
     while(digitalRead(BUTTON)){
       delay(10);
     }
   }
   while(is_running) {
     double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
-    if (obstacle_distance >= STOP_DISTANCE) {
-      digitalWrite(MOTOR, HIGH);
-      delay(50);
-    } else {
+    if (obstacle_distance <= STOP_DISTANCE) {
       is_running = false;
       digitalWrite(MOTOR, LOW);
       sendCommand(0x8f); //Resets the display
