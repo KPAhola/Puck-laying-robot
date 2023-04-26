@@ -88,11 +88,11 @@ void loop()
 {
   if (digitalRead(BUTTON)) {
     is_running = true;
-    digitalWrite(MOTOR, HIGH);
-    delay(50);
     while(digitalRead(BUTTON)){
       delay(10);
     }
+    digitalWrite(MOTOR, HIGH);
+    delay(50);
   }
   while(is_running) {
     double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
