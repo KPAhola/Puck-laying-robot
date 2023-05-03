@@ -7,13 +7,15 @@
 #define CLK 9
 #define DIO 8
 #define STB 7
-#define BUTTON 5
+#define BUTTON 6
 #define ROTATION 4
 #define MOTOR 3
+//#define MOTOR_POWER A0
 
-#define STOP_DISTANCE 5
-#define DISTANCE_PER_HOLE 0.5
-#define DISTANCE_BETWEEN_HOLES 0.5
+#define MOTOR_SPEED 100  //0-255
+#define STOP_DISTANCE 10
+#define DISTANCE_PER_HOLE 1
+#define DISTANCE_BETWEEN_HOLES 1
 #define SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER 0.01723
 
 static const uint8_t digits[] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
@@ -68,6 +70,11 @@ void display_value(double value) {
   shiftOut(DIO, CLK, LSBFIRST, digits[digit4]);
   shiftOut(DIO, CLK, LSBFIRST, 0x00);
   digitalWrite(STB, HIGH);
+
+  Serial.print(digit1);
+  Serial.print(digit2);
+  Serial.print(digit3);
+  Serial.println(digit4);
 }
 
 void setup()
@@ -81,6 +88,9 @@ void setup()
   digitalWrite(ULTRASONIC_POWER, HIGH);
   sendCommand(0x8f);
   digitalWrite(STB, HIGH);
+  //analogWrite(MOTOR_POWER, MOTOR_SPEED)
+
+  Serial.begin(9600);
 
 }
 
@@ -88,35 +98,43 @@ void loop()
 {
   if (digitalRead(BUTTON)) {
     is_running = true;
+    Serial.println("Button pressed, motor on.");
     while(digitalRead(BUTTON)){
+      display_value(9999); //for debugging
       delay(10);
     }
-    digitalWrite(MOTOR, HIGH);
-    delay(50);
+    analogWrite(MOTOR, MOTOR_SPEED);
   }
   while(is_running) {
     double obstacle_distance = SOUND_WAVE_TRAVEL_TIME_TO_DISTANCE_MULTIPLIER * readUltrasonicDistance(ULTRASONIC_TRIGGER, ULTRASONIC_ECHO);
-    if (obstacle_distance <= STOP_DISTANCE) {
-      is_running = false;
-      digitalWrite(MOTOR, LOW);
+
+    delay(20);
+    if (obstacle_distance >= STOP_DISTANCE) {
+      analogWrite(MOTOR, MOTOR_SPEED);
+      //delay(50);
+    } else {
+      digitalWrite(MOTOR, 0);
       sendCommand(0x8f); //Resets the display
+      //is_running = false;
     }
     
     if (hole) {
       if (!digitalRead(ROTATION)) {
         hole = false;
-        distance_travelled += DISTANCE_PER_HOLE;
+        distance_travelled++;
       }
     } else if (digitalRead(ROTATION)) {
       hole = true;
-      distance_travelled += DISTANCE_BETWEEN_HOLES;
+      //distance_travelled++;
     }
     display_value(distance_travelled);
     
     if (digitalRead(BUTTON)) {
       is_running = false;
-      digitalWrite(MOTOR, LOW);
+      analogWrite(MOTOR, 0);
+      Serial.println("Button pressed, motor off");
       while(digitalRead(BUTTON)){
+        //display_value(8888); //for debugging, can be removed for the presentation
         delay(10);
       }
       sendCommand(0x8f); //Resets the display
