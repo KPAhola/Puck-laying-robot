@@ -1,0 +1,11 @@
+==This is the documentation for the models that were created and used for the project==
+
+
+"motor_mount&wheels.pdf"
+	This is a 2D model made using Inkscape. It was used for laser cutting at the FabLab. The model contains a box mount intended to elevate the motor for better contact with the drive axle. It also has a design for 4 wheels, which were used as the front neutral wheels. 
+
+"chassis&mounts&encoder.pdf"
+	This 2D model contains designs for the main chassis board, axle mounts, and encoder wheel. The encoder wheel is intended to share the drive axle with the wheels, to count revolutions when paired with an IR sensor-emitter module. 
+
+"puckinator9000.f3d"
+	This is a 3D model created in Fusion360 that was used as a general visualizer and design planner for the robot. This was not directly used for the fabrication process.
